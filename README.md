@@ -9,3 +9,6 @@ ELA Collect is powered by the excellent ODK Collect app. ELA is E Learning Asses
 
 Learn more about ODK and its history [here](https://getodk.org/).
 
+## Significant changes made to the ODK Collect App
+* Modified the app to 'Download' forms from the android device. The app looks for XML files in the directory ```/Download/ela/forms```. The app does no validation of the XML. The XMLs will be added to the list of available forms in the app if they are valid ODK Collect compatible xform XML files. ODK Collect's ability to download forms from a remote server is retained.
+* Modified the app so the user can export form submissions as a ZIP file using the Android Share Intent. When a user chooses to send all submissions to the server, the app collects all submission XML files and media files if any into a ZIP file, and opens the device 'Share with' popup instead of submitting the forms to a server. The user can choose an app intent from the popup to export the ZIP file to a destination, such as send to a Bluetooth destination on a workstation. ODK Collect's ability to submit the forms to a remote server is disabled.
