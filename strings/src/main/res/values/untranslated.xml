@@ -7,9 +7,9 @@ OR CONDITIONS OF ANY KIND, either express or implied. See the License for
 the specific language governing permissions and limitations under the License. -->
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- strings that should not be translated -->
-    <string name="collect_app_name" translatable="false">ODK Collect</string>
-    <string name="app_url" translatable="false">https://getodk.org</string>
-    <string name="forum_url" translatable="false">"https://forum.getodk.org"</string>
+    <string name="collect_app_name" translatable="false">ELA Collect</string>
+    <string name="app_url" translatable="false">https://itforchange.net</string>
+    <string name="forum_url" translatable="false">"https://itforchange.net"</string>
     <string name="never_value" translatable="false">never</string>
     <string name="every_fifteen_minutes_value" translatable="false">every_fifteen_minutes</string>
     <string name="every_one_hour_value" translatable="false">every_one_hour</string>
