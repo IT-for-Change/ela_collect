@@ -15,10 +15,12 @@
 package org.odk.collect.android.activities;
 
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
 import android.view.View;
@@ -54,6 +56,7 @@ import org.odk.collect.android.tasks.DownloadFormsTask;
 import org.odk.collect.android.utilities.ApplicationConstants;
 import org.odk.collect.android.utilities.AuthDialogUtility;
 import org.odk.collect.android.utilities.DialogUtils;
+import org.odk.collect.android.utilities.ELAUtil;
 import org.odk.collect.android.utilities.WebCredentialsUtils;
 import org.odk.collect.android.views.DayNightProgressDialog;
 import org.odk.collect.androidshared.ui.DialogFragmentUtils;
@@ -104,6 +107,9 @@ public class FormDownloadListActivity extends FormListActivity implements FormLi
     public static final String FORM_ID_KEY = "formid";
     private static final String FORM_VERSION_KEY = "formversion";
 
+    private static final int REQUEST_CODE_OPEN_DOCUMENT = 1;
+
+
     private AlertDialog alertDialog;
     private ProgressDialog cancelDialog;
     private Button downloadButton;
@@ -141,6 +147,8 @@ public class FormDownloadListActivity extends FormListActivity implements FormLi
 
         setContentView(R.layout.form_download_list);
         setTitle(getString(org.odk.collect.strings.R.string.get_forms));
+        //CHANDRA
+        copyOverLocalForms();
 
         viewModel = new ViewModelProvider(this, new FormDownloadListViewModel.Factory())
                 .get(FormDownloadListViewModel.class);
@@ -760,5 +768,32 @@ public class FormDownloadListActivity extends FormListActivity implements FormLi
     @Override
     public void onCloseDownloadingResult() {
         finish();
+    }
+
+    private void copyOverLocalForms() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // ELAUtil.copyXmlFilesFromFormsDirectory(this);
+
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.setType("*/*"); // Allows any file type; you can specify "application/xml" for XML files
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+            try {
+                startActivityForResult(intent, REQUEST_CODE_OPEN_DOCUMENT);
+            } catch (ActivityNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_OPEN_DOCUMENT && resultCode == RESULT_OK && data != null) {
+            Uri fileUri = data.getData(); // URI of the selected file
+            String projectId = projectsDataService.requireCurrentProject().getUuid();
+            ELAUtil.copyXmlFilesFromFormsDirectory(this, fileUri, projectId);
+        }
     }
 }

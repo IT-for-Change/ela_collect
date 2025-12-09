@@ -16,13 +16,14 @@ package org.odk.collect.android.listeners;
 
 import android.net.Uri;
 
+import java.io.File;
 import java.util.HashMap;
 
 /**
  * @author Carl Hartung (carlhartung@gmail.com)
  */
 public interface InstanceUploaderListener {
-    void uploadingComplete(HashMap<String, String> result);
+    void uploadingComplete(HashMap<String, String> result, File localSubmissionFile);
 
     void progressUpdate(int progress, int total);
 

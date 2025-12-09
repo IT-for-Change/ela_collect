@@ -22,6 +22,9 @@ import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.content.Intent;
+import androidx.core.content.FileProvider;
+
 
 import org.odk.collect.android.activities.FormFillingActivity;
 import org.odk.collect.android.fragments.dialogs.SimpleDialog;
@@ -41,6 +44,7 @@ import org.odk.collect.openrosa.http.OpenRosaConstants;
 import org.odk.collect.settings.SettingsProvider;
 import org.odk.collect.strings.localization.LocalizedActivity;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -250,7 +254,7 @@ public class InstanceUploaderActivity extends LocalizedActivity implements Insta
     }
 
     @Override
-    public void uploadingComplete(HashMap<String, String> result) {
+    public void uploadingComplete(HashMap<String, String> result, File submissionFile) {
         Timber.i("uploadingComplete: Processing results (%d) from upload of %d instances!",
                 result.size(), instancesToSend.length);
 
@@ -263,6 +267,7 @@ public class InstanceUploaderActivity extends LocalizedActivity implements Insta
         // If the activity is paused or in the process of pausing, don't show the dialog
         if (!isInstanceStateSaved) {
             createUploadInstancesResultDialog(InstanceUploaderUtils.getUploadResultMessage(instancesRepository, this, result));
+            showShareIntent(submissionFile);
         } else {
             // Clean up
             finish();
@@ -363,6 +368,21 @@ public class InstanceUploaderActivity extends LocalizedActivity implements Insta
 
         SimpleDialog simpleDialog = SimpleDialog.newInstance(dialogTitle, 0, message, buttonTitle, true);
         simpleDialog.show(getSupportFragmentManager(), SimpleDialog.COLLECT_DIALOG_TAG);
+    }
+
+    private void showShareIntent(File submissionFile) {
+
+        Uri fileUri = FileProvider.getUriForFile(
+                InstanceUploaderActivity.this,
+                getPackageName() + ".provider",
+                submissionFile
+        );
+
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("application/zip"); // Or whatever type the file is (e.g., image/*, application/pdf)
+        shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(Intent.createChooser(shareIntent, "Share File"));
     }
 
     @Override

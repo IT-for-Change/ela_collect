@@ -29,7 +29,9 @@ import org.odk.collect.android.listeners.InstanceUploaderListener;
 import org.odk.collect.android.projects.ProjectsDataService;
 import org.odk.collect.android.upload.FormUploadAuthRequestedException;
 import org.odk.collect.android.upload.FormUploadException;
+import org.odk.collect.android.upload.InstanceLocalUploader;
 import org.odk.collect.android.upload.InstanceServerUploader;
+import org.odk.collect.android.utilities.FileUtils;
 import org.odk.collect.android.utilities.InstanceAutoDeleteChecker;
 import org.odk.collect.android.utilities.InstancesRepositoryProvider;
 import org.odk.collect.android.utilities.WebCredentialsUtils;
@@ -41,6 +43,7 @@ import org.odk.collect.openrosa.http.OpenRosaHttpInterface;
 import org.odk.collect.settings.SettingsProvider;
 import org.odk.collect.settings.keys.ProjectKeys;
 
+import java.io.File;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +52,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
+
+import timber.log.Timber;
 
 /**
  * Background task for uploading completed forms.
@@ -89,45 +94,34 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
 
     @Override
     public Outcome doInBackground(Long... instanceIdsToUpload) {
+
         Outcome outcome = new Outcome();
 
-        InstanceServerUploader uploader = new InstanceServerUploader(httpInterface, webCredentialsUtils, settingsProvider.getUnprotectedSettings(), instancesRepository);
+        InstanceLocalUploader uploader = new InstanceLocalUploader(settingsProvider.getUnprotectedSettings(), instancesRepository);
+
         List<Instance> instancesToUpload = uploader
                 .getInstancesFromIds(instanceIdsToUpload)
                 .stream()
                 .sorted(Comparator.comparing(Instance::getFinalizationDate))
                 .collect(Collectors.toList());
 
-        String deviceId = propertyManager.getSingularProperty(PropertyManager.PROPMGR_DEVICE_ID);
-
         for (int i = 0; i < instancesToUpload.size(); i++) {
-            if (isCancelled()) {
-                return outcome;
-            }
+
             Instance instance = instancesToUpload.get(i);
 
             publishProgress(i + 1, instancesToUpload.size());
 
-            if (completeDestinationUrl != null) {
-                Analytics.log(AnalyticsEvents.INSTANCE_UPLOAD_CUSTOM_SERVER, "label", referrer != null ? referrer : "");
-            }
-
             try {
-                String destinationUrl = uploader.getUrlToSubmitTo(instance, deviceId, completeDestinationUrl, null);
-                String customMessage = uploader.uploadOneSubmission(instance, destinationUrl);
-                outcome.messagesByInstanceId.put(instance.getDbId().toString(),
-                        customMessage != null ? customMessage : getLocalizedString(Collect.getInstance(), org.odk.collect.strings.R.string.success));
-
-                Analytics.log(SUBMISSION, "HTTP", Collect.getFormIdentifierHash(instance.getFormId(), instance.getFormVersion()));
-            } catch (FormUploadAuthRequestedException e) {
-                outcome.authRequestingServer = e.getAuthRequestingServer();
-                // Don't add the instance that caused an auth request to the map because we want to
-                // retry. Items present in the map are considered already attempted and won't be
-                // retried.
-            } catch (FormUploadException e) {
+                uploader.addToZip(instance);
+                uploader.markSubmissionComplete(instance); //necessary for workflow to proceed normally.
+            } catch (Exception e) {
+                Timber.d(e.getMessage() != null ? e.getMessage() : e.toString());
                 outcome.messagesByInstanceId.put(instance.getDbId().toString(),
                         e.getMessage());
             }
+            outcome.messagesByInstanceId.put(instance.getDbId().toString(), getLocalizedString(Collect.getInstance(), org.odk.collect.strings.R.string.success));
+            outcome.localSubmissionFile = uploader.getZipFile();
+            Analytics.log(SUBMISSION, "HTTP", Collect.getFormIdentifierHash(instance.getFormId(), instance.getFormVersion()));
         }
 
         // Delete instances that were successfully sent and that need to be deleted
@@ -173,10 +167,12 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 if (outcome.authRequestingServer != null) {
                     stateListener.authRequest(outcome.authRequestingServer, outcome.messagesByInstanceId);
                 } else {
-                    stateListener.uploadingComplete(outcome.messagesByInstanceId);
+                    stateListener.uploadingComplete(outcome.messagesByInstanceId, outcome.localSubmissionFile);
                 }
             }
         }
+
+
 
         // Clear temp credentials
         clearTemporaryCredentials();
@@ -272,5 +268,6 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
          * instead of a mix of localized and non-localized user-facing strings.
          */
         public HashMap<String, String> messagesByInstanceId = new HashMap<>();
+        public File localSubmissionFile = null;
     }
 }

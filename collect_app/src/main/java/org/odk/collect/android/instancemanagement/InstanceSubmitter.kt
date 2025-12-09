@@ -36,8 +36,8 @@ class InstanceSubmitter(
 
         for (instance in toUpload.sortedBy { it.finalizationDate }) {
             try {
-                val destinationUrl = uploader.getUrlToSubmitTo(instance, deviceId, null, null)
-                uploader.uploadOneSubmission(instance, destinationUrl)
+                //val destinationUrl = uploader.getUrlToSubmitTo(instance, deviceId, null, null)
+                //uploader.uploadOneSubmission(instance, destinationUrl)
                 result[instance] = null
 
                 deleteInstance(instance)
