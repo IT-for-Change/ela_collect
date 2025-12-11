@@ -742,6 +742,8 @@
     <string name="form_update_notification_title">Syncing forms</string>
 
     <string name="load_remote_form_error">Form list download failed</string>
+    <string name="load_remote_form_error_ignore">Server form list download failed.</string>
+    <string name="load_local_form_error">Local form load failed</string>
 
     <string name="forms_download_succeeded">Forms download succeeded</string>
     <string name="forms_download_failed">Forms download failed</string>
@@ -1170,16 +1172,16 @@
     -->
     <!-- Tag line displayed on the first launch screen. The text should be split into two lines with \n. Please
     select the wording and where to put the \n for maximum impact in your language. -->
-    <string name="tagline">Collect data\nanywhere</string>
+    <string name="tagline">Assess learners\nanywhere</string>
     <!-- Text for the button that allows for configuring a project by scanning a QR code. Should be short -->
     <string name="configure_with_qr_code">Configure with QR code</string>
     <!-- Text for the button that allows for manually entering project details. Should be short -->
     <string name="configure_manually">Manually enter project details</string>
     <string name="project_config_tip">After you add your project, you can configure it in Settings</string>
     <!-- Immediately followed by "Try Collect" which is a link to create a demo project -->
-    <string name="dont_have_project">Don\'t have a project yet?</string>
+    <string name="dont_have_project">Get started with ELA</string>
     <!-- Preceded by "Don't have a project yet?" question -->
-    <string name="try_demo">Try a demo</string>
+    <string name="try_demo">Tap here</string>
     <string name="scan_configuration_qr_code">Scan configuration QR code</string>
 
     <!--

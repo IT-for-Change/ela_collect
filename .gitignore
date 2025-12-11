@@ -54,3 +54,6 @@ robolectric-deps/
 
 .local-m2
 apks
+/collect_app/release/baselineProfiles/0/ELA-Collect-release.dm
+/collect_app/release/baselineProfiles/1/ELA-Collect-release.dm
+/collect_app/release/output-metadata.json

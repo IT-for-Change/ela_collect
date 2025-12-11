@@ -3,9 +3,14 @@ package org.odk.collect.android.utilities;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
+
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -80,4 +85,17 @@ public class ELAUtil {
             outputStream.write(buffer, 0, length);
         }
     }
+
+    public static String getAppName(Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        ApplicationInfo applicationInfo;
+        try {
+            applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return (String) packageManager.getApplicationLabel(applicationInfo);
+    }
+
 }

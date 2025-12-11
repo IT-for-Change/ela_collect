@@ -546,8 +546,10 @@ public class FormDownloadListActivity extends FormListActivity implements FormLi
             if (exception instanceof FormSourceException.AuthRequired) {
                 createAuthDialog();
             } else {
-                String dialogMessage = new FormSourceExceptionMapper(this).getMessage(exception);
-                String dialogTitle = getString(org.odk.collect.strings.R.string.load_remote_form_error);
+                String appName = ELAUtil.getAppName(this);
+                String dialogMessage = "This is expected behavior in " + appName +
+                ". Ignore and continue to the 'Start new form' activity";
+                String dialogTitle = getString(org.odk.collect.strings.R.string.load_remote_form_error_ignore);
 
                 if (viewModel.isDownloadOnlyMode()) {
                     setReturnResult(false, dialogMessage, viewModel.getFormResults());
@@ -794,6 +796,10 @@ public class FormDownloadListActivity extends FormListActivity implements FormLi
             Uri fileUri = data.getData(); // URI of the selected file
             String projectId = projectsDataService.requireCurrentProject().getUuid();
             ELAUtil.copyXmlFilesFromFormsDirectory(this, fileUri, projectId);
+        } else {
+            String dialogTitle = getString(org.odk.collect.strings.R.string.load_local_form_error);
+            String dialogMessage = "Result code " + resultCode;
+            createAlertDialog(dialogTitle, dialogMessage, DO_NOT_EXIT);
         }
     }
 }
