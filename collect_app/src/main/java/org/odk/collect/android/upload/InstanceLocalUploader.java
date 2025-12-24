@@ -64,7 +64,9 @@ public class InstanceLocalUploader extends InstanceUploader {
             }
             _zos.closeEntry();
         }
-
+        if (_zos != null){
+            _zos.close();
+        }
         return;
     }
 
@@ -72,7 +74,7 @@ public class InstanceLocalUploader extends InstanceUploader {
         Date currentDate = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         String formattedDate = dateFormat.format(currentDate);
-        return "SUBMISSIONS_" + formattedDate + ".zip";
+        return "ELA_SUBMISSIONS_" + formattedDate + ".zip";
     }
 
     public File getZipFile(){
